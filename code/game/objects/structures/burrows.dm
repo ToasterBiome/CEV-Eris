@@ -687,11 +687,12 @@ percentage is a value in the range 0..1 that determines what portion of this mob
 
 
 /obj/structure/burrow/ex_act(severity)
-	var/turf/T = get_turf(src)
-	if(T.is_hole)
-		qdel(src)
-	else
-		collapse()
+	spawn(1)
+		var/turf/T = get_turf(src)
+		if(T.is_hole)
+			qdel(src)
+		else
+			collapse()
 
 /obj/structure/burrow/preventsTurfInteractions()
 	if(isRevealed)
