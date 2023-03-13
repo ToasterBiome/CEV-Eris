@@ -160,8 +160,6 @@
 	return ..()
 
 /mob/living/carbon/human/adjustOxyLoss(amount)
-	if(in_stasis && amount > 0)		// Stasis prevents oxy loss
-		return
 	if(species.flags & NO_BREATHE)
 		oxyloss = 0
 	else
