@@ -57,11 +57,13 @@
 		src.throw_impact(A)
 		src.throwing = 0
 
-
-	if (A && yes)
-		A.last_bumped = world.time
-		A.Bumped(src)
-	return ..()
+	spawn(0)
+		if (A && yes)
+			A.last_bumped = world.time
+			A.Bumped(src)
+		return
+	..()
+	return
 
 /atom/movable/proc/entered_with_container(var/atom/old_loc)
 	return
@@ -127,7 +129,8 @@
 		src.throwing = 0
 		var/turf/T = hit_atom
 		if(T.density)
-			step(src, turn(src.last_move, 180))
+			spawn(2)
+				step(src, turn(src.last_move, 180))
 			if(isliving(src))
 				var/mob/living/M = src
 				M.turf_collision(T, speed)
@@ -139,38 +142,114 @@
 			if(A == src) continue
 			if(isliving(A))
 				if(A:lying) continue
-				//if(SSthrowing.throwing_queue[src][I_THROWNTIME] > world.time - 1 SECONDS && thrower == A) continue
 				src.throw_impact(A,speed)
 			if(isobj(A))
 				if(A.density && !A.throwpass)	// **TODO: Better behaviour for windows which are dense, but shouldn't always stop movement
 					src.throw_impact(A,speed)
 
-
 /atom/movable/proc/throw_at(atom/target, range, speed, thrower)
-	if(!target || range < 1 || speed < 1)
-		return FALSE
+	if(!target || !src)	return 0
+	//use a modified version of Bresenham's algorithm to get from the atom's current position to that of the target
+
+	set_dir(pick(cardinal))
+	src.throwing = 1
 	if(target.allow_spin && src.allow_spin)
 		SpinAnimation(5,1)
-	src.throwing = TRUE
 	src.thrower = thrower
-	throw_source = get_turf(thrower)
+	src.throw_source = get_turf(src)	//store the origin turf
+
+//	if(usr)
+//		if(HULK in usr.mutations)
+//			src.throwing = 2 // really strong throw!
+
 	var/dist_x = abs(target.x - src.x)
 	var/dist_y = abs(target.y - src.y)
-	/// spot 4 is for tiles we already moved, 5,6 for distx and disty, and 7,8 for dx, dy and 9 for current error
-	SSthrowing.throwing_queue[src] = list(
-		target,
-		speed,
-		range,
-		0,
-		dist_x,
-		dist_y,
-		target.x > x ? EAST : WEST,
-		target.y > y ? NORTH : SOUTH,
-		dist_x > dist_y ? dist_x/2 - dist_y : dist_y/2 - dist_x,
-		get_turf(target),
-	)
-	return TRUE
 
+	var/dx
+	if (target.x > src.x)
+		dx = EAST
+	else
+		dx = WEST
+
+	var/dy
+	if (target.y > src.y)
+		dy = NORTH
+	else
+		dy = SOUTH
+	var/dist_travelled = 0
+	var/dist_since_sleep = 0
+	var/area/a = get_area(src.loc)
+	if(dist_x > dist_y)
+		var/error = dist_x/2 - dist_y
+
+		while(src && target &&((((src.x < target.x && dx == EAST) || (src.x > target.x && dx == WEST)) && dist_travelled < range) || (a && a.has_gravity == 0)  || istype(src.loc, /turf/space)) && src.throwing && istype(src.loc, /turf))
+			// only stop when we've gone the whole distance (or max throw range) and are on a non-space tile, or hit something, or hit the end of the map, or someone picks it up
+			if(error < 0)
+				var/atom/step = get_step(src, dy)
+				if(!step) // going off the edge of the map makes get_step return null, don't let things go off the edge
+					break
+				src.Move(step)
+				hit_check(speed)
+				error += dist_x
+				dist_travelled++
+				dist_since_sleep++
+				if(dist_since_sleep >= speed)
+					dist_since_sleep = 0
+					sleep(1)
+			else
+				var/atom/step = get_step(src, dx)
+				if(!step) // going off the edge of the map makes get_step return null, don't let things go off the edge
+					break
+				src.Move(step)
+				hit_check(speed)
+				error -= dist_y
+				dist_travelled++
+				dist_since_sleep++
+				if(dist_since_sleep >= speed)
+					dist_since_sleep = 0
+					sleep(1)
+			a = get_area(src.loc)
+	else
+		var/error = dist_y/2 - dist_x
+		while(src && target &&((((src.y < target.y && dy == NORTH) || (src.y > target.y && dy == SOUTH)) && dist_travelled < range) || (a && a.has_gravity == 0)  || istype(src.loc, /turf/space)) && src.throwing && istype(src.loc, /turf))
+			// only stop when we've gone the whole distance (or max throw range) and are on a non-space tile, or hit something, or hit the end of the map, or someone picks it up
+			if(error < 0)
+				var/atom/step = get_step(src, dx)
+				if(!step) // going off the edge of the map makes get_step return null, don't let things go off the edge
+					break
+				src.Move(step)
+				hit_check(speed)
+				error += dist_y
+				dist_travelled++
+				dist_since_sleep++
+				if(dist_since_sleep >= speed)
+					dist_since_sleep = 0
+					sleep(1)
+			else
+				var/atom/step = get_step(src, dy)
+				if(!step) // going off the edge of the map makes get_step return null, don't let things go off the edge
+					break
+				src.Move(step)
+				hit_check(speed)
+				error -= dist_x
+				dist_travelled++
+				dist_since_sleep++
+				if(dist_since_sleep >= speed)
+					dist_since_sleep = 0
+					sleep(1)
+
+			a = get_area(src.loc)
+
+	//done throwing, either because it hit something or it finished moving
+	src.throwing = 0
+	src.thrower = null
+	src.throw_source = null
+
+	var/turf/new_loc = get_turf(src)
+	if(new_loc)
+		if(isobj(src))
+			src.throw_impact(new_loc,speed)
+		new_loc.Entered(src)
 
 //Overlays
 /atom/movable/overlay

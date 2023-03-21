@@ -323,26 +323,12 @@
 	visible_message(SPAN_DANGER("\The [src] spontaneously combusts!.")) //!!OH SHIT!!
 	return
 
-/turf/simulated/wall/take_damage(dam)
-	var/initialdamage = damage
-	damage = max(0, damage + dam)
-	var/cap = material.integrity
-	if(reinf_material)
-		cap += reinf_material.integrity
-	if(locate(/obj/effect/overlay/wallrot) in src)
-		cap = cap / 10
-	if(damage >= cap)
-		var/leftover = damage - cap
-		var/damage_before_change = damage
-		if (leftover > 150)
-			dismantle_wall(no_product = TRUE)
-		else
-			dismantle_wall()
-		// because we can do changeTurf and lose the var
-		return damage_before_change - initialdamage
-	update_icon()
-	return dam
-/*
+/turf/simulated/wall/proc/take_damage(dam)
+	if(dam)
+		damage = max(0, damage + dam)
+		update_damage()
+	return
+
 /turf/simulated/wall/proc/update_damage()
 	var/cap = material.integrity
 	if(reinf_material)
@@ -357,17 +343,10 @@
 			dismantle_wall(no_product = TRUE)
 		else
 			dismantle_wall()
-		return leftover
-	update_icon()
-	return 0
-*/
+	else
+		update_icon()
 
-/turf/simulated/wall/explosion_act(target_power, explosion_handler/handler)
-	var/absorbed = take_damage(target_power)
-	// All damage has been blocked
-	if(absorbed == target_power)
-		return target_power
-	return absorbed + ..(target_power - absorbed)
+	return
 
 /turf/simulated/wall/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)//Doesn't fucking work because walls don't interact with air :(
 	burn(exposed_temperature)
@@ -404,7 +383,6 @@
 
 	ChangeTurf(/turf/simulated/floor/plating)
 
-/*
 /turf/simulated/wall/ex_act(severity)
 	switch(severity)
 		if(1)
@@ -417,7 +395,6 @@
 			take_damage(rand(40, 100))
 		else
 	return
-*/
 
 
 

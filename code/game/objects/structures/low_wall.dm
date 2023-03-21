@@ -34,10 +34,8 @@
 
 	var/construction_stage
 
-	maxHealth = 450
-	health = 450
-	// Anything above is far too blocking.
-	explosionCoverage = 0.2
+	var/maxhealth = 450
+	var/health = 450
 
 	var/hitsound = 'sound/weapons/Genhit.ogg'
 	climbable = TRUE
@@ -182,7 +180,7 @@
 
 	if(valid)
 		var/pierce = P.check_penetrate(src)
-		take_damage(P.get_structure_damage()/2)
+		health -= P.get_structure_damage()/2
 		if (health > 0)
 			visible_message(SPAN_WARNING("[P] hits \the [src]!"))
 			return pierce
@@ -288,8 +286,9 @@
 
 
 		if(propagate)
-			T.update_connections()
-			T.update_icon()
+			spawn(0)
+				T.update_connections()
+				T.update_icon()
 
 		//If this low wall is in a cardinal direction to us,
 		//then we will grab full walls that are cardinal to IT
@@ -325,8 +324,9 @@
 			deferred_diagonals |= T_dir
 
 		if(propagate)
-			T.update_connections()
-			T.update_icon()
+			spawn(0)
+				T.update_connections()
+				T.update_icon()
 
 	//Last chance to connect
 	//Now we will dump cpnnected_cardinals list into a bitfield to make the next section simpler
@@ -418,10 +418,10 @@
 					for(var/obj/effect/overlay/wallrot/WR in src)
 						qdel(WR)
 					return
-			if(health < maxHealth)
+			if(health < maxhealth)
 				if(I.use_tool(user, src, WORKTIME_NORMAL, tool_type, FAILCHANCE_NORMAL, required_stat = STAT_MEC))
 					to_chat(user, SPAN_NOTICE("You repair the damage to [src]."))
-					take_damage(maxHealth - health)
+					take_damage(maxhealth - health)
 					return
 			if(isnull(construction_stage))
 				to_chat(user, SPAN_NOTICE("You begin removing the outer plating..."))
@@ -487,17 +487,18 @@
 	qdel(src)
 
 
-/obj/structure/low_wall/take_damage(damage)
-	. = health - damage < 0 ? damage - (damage - health) : damage
-	. *= explosionCoverage
+/obj/structure/low_wall/proc/take_damage(dam)
 	if(locate(/obj/effect/overlay/wallrot) in src)
-		damage *= 10
-	health -= damage
+		dam *= 10
+
+	health -= dam
+	update_damage()
+
+/obj/structure/low_wall/proc/update_damage()
 	if(health < 0)
 		dismantle_wall()
 	else
 		update_icon()
-	return
 
 /obj/structure/low_wall/proc/clear_plants()
 	for(var/obj/effect/overlay/wallrot/WR in src)
