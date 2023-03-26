@@ -865,8 +865,8 @@ default behaviour is:
 	static_overlay = image(get_static_icon(new/icon(icon, icon_state)), loc = src)
 	static_overlay.override = 1
 
-/mob/living/Initialize()
-	. = ..()
+/mob/living/New()
+	..()
 
 	if(!real_name)
 		real_name = name
