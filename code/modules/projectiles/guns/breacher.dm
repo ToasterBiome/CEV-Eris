@@ -245,7 +245,7 @@
 		var/mob/living/carbon/human/H = src
 		H.take_overall_damage(35, 10)
 	else
-		explosion_act(600, null)
+		ex_act(2)
 //turfs
 
 /turf/simulated/wall/hatton_act()
@@ -255,7 +255,7 @@
 	take_damage(1000)
 
 /turf/simulated/mineral/hatton_act()
-	explosion_act(1000, null)
+	ex_act(1)
 
 
 
@@ -266,7 +266,7 @@
 	Dismantle()*/
 
 /obj/structure/hatton_act()
-	explosion_act(1000, null)
+	ex_act(1)
 
 /obj/machinery/deployable/barrier/hatton_act()
 	visible_message(SPAN_DANGER("The [src] is blown apart!"))
@@ -278,7 +278,7 @@
 //machines
 
 /obj/machinery/hatton_act()
-	explosion_act(500, null)
+	ex_act(2)
 
 /obj/machinery/computer/hatton_act()
 	..()
@@ -286,7 +286,7 @@
 	return
 
 /obj/machinery/door/hatton_act()
-	explosion_act(500, null)
+	ex_act(1)
 
 
 //ignore

@@ -98,7 +98,12 @@
 				I.color = reinf_color
 				overlays += I
 
-		var/overlay = round((1 - health/maxHealth) * damage_overlays.len) + 1
+	if(damage != 0)
+		var/integrity = material.integrity
+		if(reinf_material)
+			integrity += reinf_material.integrity
+
+		var/overlay = round(damage / integrity * damage_overlays.len) + 1
 		if(overlay > damage_overlays.len)
 			overlay = damage_overlays.len
 
@@ -125,12 +130,13 @@
 		var/T_dir = get_dir(src, T)
 		dirs |= T_dir
 		if(propagate)
-			T.update_connections()
-			T.update_icon()
+			spawn(0)
+				T.update_connections()
+				T.update_icon()
 
 	wall_connections = dirs_to_corner_states(dirs)
 
 /turf/simulated/wall/proc/can_join_with(var/turf/simulated/wall/W)
 	if(material && W.material && material.icon_base == W.material.icon_base)
-		return TRUE
-	return FALSE
+		return 1
+	return 0
