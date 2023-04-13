@@ -50,6 +50,8 @@
 #define COMSIG_EXAMINE "examine"								//from atom/examine(): (mob/user, distance)
 #define COMSIG_ATOM_UPDATE_OVERLAYS "atom_update_overlays"  //update_overlays()
 #define COMSIG_ATOM_UNFASTEN "atom_unfasten" // set_anchored()
+// Whenever we are put into a container of any sort , storage , closets , pockets. (atom/true_parent)
+#define COMSIG_ATOM_CONTAINERED "atom_containered"
 
 // /area signals
 #define COMSIG_AREA_SANCTIFY "sanctify_area"
@@ -58,14 +60,16 @@
 #define COMSIG_TURF_LEVELUPDATE "turf_levelupdate" //levelupdate()
 
 // /atom/movable signals
-#define COMSIG_MOVABLE_MOVED "movable_moved"					//from base of atom/movable/Moved(): (/atom, origin_loc, new_loc)
-#define COMSIG_MOVABLE_Z_CHANGED "movable_z_moved"				//from base of atom/movable/onTransitZ(): (oldz, newz)
+// These 2 can be sent at the same time togheter, if you only care about the Z-level , only use the Z-changed , else only use the moved.
+#define COMSIG_MOVABLE_MOVED "movable_moved"					//from atom/movable/Move and forceMove: (/atom, origin_loc, new_loc)
+#define COMSIG_MOVABLE_Z_CHANGED "movable_z_moved"				//from atom/movable/Move and forceMove): (oldz, newz)
 #define COMSIG_MOVABLE_PREMOVE "moveable_boutta_move"
 
 // /mob signals
 #define COMSIG_MOB_LIFE  "mob_life"							 //from mob/Life()
 #define COMSIG_MOB_LOGIN "mob_login"							//from mob/Login()
 #define COMSIG_MOB_DEATH "mob_death"							//from mob/death()
+#define COMSIG_MOB_INITIALIZED "mob_initialized"
 #define COMSIG_SHIFTCLICK "shiftclick" // used for ai_like_control component
 #define COMSIG_CTRLCLICK "ctrlclick" // used for ai_like_control component
 #define COMSIG_ALTCLICK "altclick" // used for ai_like_control component
