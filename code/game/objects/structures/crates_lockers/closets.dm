@@ -164,6 +164,8 @@
 		return
 
 	AM.forceMove(src)
+	// This could submit Src as the containing moveable , but in the future someone
+	// might as well add vehicles and not adjust this.
 	if(AM.pulledby)
 		AM.pulledby.stop_pulling()
 

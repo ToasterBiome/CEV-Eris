@@ -27,6 +27,15 @@
 	health = 500
 	maxHealth = 500
 
+/obj/item/storage/Initialize(mapload, ...)
+	. = ..()
+	RegisterSignal(src, COMSIG_ATOM_CONTAINERED, PROC_REF(RelayContainerization))
+
+/obj/item/storage/proc/RelayContainerization(atom/source, highestContainer, oldContainer)
+	SIGNAL_HANDLER
+	for(var/atom/thing as anything in contents)
+		SEND_SIGNAL(thing, COMSIG_ATOM_CONTAINERED, highestContainer, oldContainer)
+
 /obj/item/storage/New()
 	can_hold |= can_hold_extra
 	. = ..()
@@ -353,7 +362,8 @@
 		usr.prepare_for_slotmove(W)
 		usr.update_icons() //update our overlays
 
-	W.loc = src
+	//W.loc = src
+	W.forceMove(src)
 	W.on_enter_storage(src)
 
 	if(usr)
