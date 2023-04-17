@@ -149,8 +149,8 @@
 	tank?.connected_console = src
 	SSnano.update_uis(src)
 
-/obj/machinery/pulsar/ex_act(severity)
-	return
+/obj/machinery/pulsar/explosion_act(target_power, explosion_handler/handler)
+	return FALSE
 
 /obj/machinery/power/pulsar_power_bridge //Only holds ref to the console and its area, used to get power from it, or disconnect the ship.
 	name = "pulsar power bridge"
